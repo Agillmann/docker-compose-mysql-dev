@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  db:
+    container_name: mysql_dev_data
+    image: mariadb:10.4
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=testdev
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d:rw
+      - ./mysql_data:/var/lib/mysql:rw
+volumes:
+  db:
+    driver: local
