@@ -37,10 +37,13 @@ CREATE TABLE smartdata (
 
 CREATE TABLE smartdata_values (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    country INT,
-    sector INT,
-    unit INT,
+    country_id INT,
+    sector_id INT,
+    unit_id INT,
     value FLOAT
+    PRIMARY KEY(country_id, sector_id, unit_id),
+    FOREIGN KEY(sector_id) REFERENCES sectors(id),
+    FOREIGN KEY(unit_id) REFERENCES smartdata_units(id)
 );
 
 CREATE TABLE smartdata_units (
@@ -103,6 +106,65 @@ CREATE TABLE unit_role (
     FOREIGN KEY(unit_id) REFERENCES smartdata_units(id),
     FOREIGN KEY(role_id) REFERENCES roles(id)
 );
+
+-- Create Indexes
+CREATE INDEX idx_user_role ON user_role (user_id, role_id);
+CREATE INDEX idx_country_role ON country_role (country_id, role_id);
+CREATE INDEX idx_sector_role ON sector_role (sector_id, role_id);
+CREATE INDEX idx_smartdata_role ON smartdata_role (smartdata_id, role_id);
+CREATE INDEX idx_version_role ON version_role (version_id, role_id);
+CREATE INDEX idx_unit_role ON unit_role (unit_id, role_id);
+
+-- Create Views
+
+-- Admin Role View
+CREATE VIEW admin_role_view AS
+SELECT roles.name, smartdata.name AS smartdata_name, smardata_versions.version AS version, sectors.name AS sector_name, countries.name AS country_name
+FROM roles
+JOIN user_role ON roles.id = user_role.role_id
+JOIN users ON user_role.user_id = users.id
+JOIN country_role ON roles.id = country_role.role_id
+JOIN countries ON country_role.country_id = countries.id
+JOIN sector_role ON roles.id = sector_role.role_id
+JOIN sectors ON sector_role.sector_id = sectors.id
+JOIN smartdata_role ON roles.id = smartdata_role.role_id
+JOIN smartdata ON smartdata_role.smartdata_id = smartdata.id
+JOIN version_role ON roles.id = version_role.role_id
+JOIN smardata_versions ON version_role.version_id = smardata_versions.id
+WHERE users.id = 1;
+
+-- User Role View
+CREATE VIEW user_role_view AS
+SELECT roles.name, smartdata.name AS smartdata_name, smardata_versions.version AS version, sectors.name AS sector_name, countries.name AS country_name
+FROM roles
+JOIN user_role ON roles.id = user_role.role_id
+JOIN users ON user_role.user_id = users.id
+JOIN country_role ON roles.id = country_role.role_id
+JOIN countries ON country_role.country_id = countries.id
+JOIN sector_role ON roles.id = sector_role.role_id
+JOIN sectors ON sector_role.sector_id = sectors.id
+JOIN smartdata_role ON roles.id = smartdata_role.role_id
+JOIN smartdata ON smartdata_role.smartdata_id = smartdata.id
+JOIN version_role ON roles.id = version_role.role_id
+JOIN smardata_versions ON version_role.version_id = smardata_versions.id
+WHERE users.id = 2;
+
+-- Guest Role View
+CREATE VIEW guest_role_view AS
+SELECT roles.name, smartdata.name AS smartdata_name, smardata_versions.version AS version, sectors.name AS sector_name, countries.name AS country_name
+FROM roles
+JOIN user_role ON roles.id = user_role.role_id
+JOIN users ON user_role.user_id = users.id
+JOIN country_role ON roles.id = country_role.role_id
+JOIN countries ON country_role.country_id = countries.id
+JOIN sector_role ON roles.id = sector_role.role_id
+JOIN sectors ON sector_role.sector_id = sectors.id
+JOIN smartdata_role ON roles.id = smartdata_role.role_id
+JOIN smartdata ON smartdata_role.smartdata_id = smartdata.id
+JOIN version_role ON roles.id = version_role.role_id
+JOIN smardata_versions ON version_role.version_id = smardata_versions.id
+WHERE users.id = 3;
+
 
 INSERT INTO roles (name, description) VALUES ('ADMIN', 'Administrator');
 INSERT INTO roles (name, description) VALUES ('USER', 'User');
